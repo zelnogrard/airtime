@@ -2,7 +2,7 @@
 
 require_once 'PHPUnit/Framework/TestCase.php';
 
-class SidePlaylistControllerTest extends PHPUnit_Framework_TestCase
+class SideplaylistControllerTest extends PHPUnit_Framework_TestCase
 {
 
     public function setUp()

@@ -556,7 +556,10 @@ SQL;
             return null;
         }
         $storedFile->setMetadata($md);
-
+        
+        //schedule metadata update so that changes are applied directly after upload
+        Application_Model_RabbitMq::SendMessageToMediaMonitor("md_update", $md);
+        
         return $storedFile;
     }
 
