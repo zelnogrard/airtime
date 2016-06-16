@@ -667,7 +667,7 @@ WHERE si.starts <= :timeNow1::TIMESTAMP
 ORDER BY si.starts DESC LIMIT 1
 SQL;
 
-        $id = Application_Common_Database( $sql, array(
+        $id = Application_Common_Database::prepareAndExecute( $sql, array(
             ':timeNow1' => $p_timeNow,
             ':timeNow2' => $p_timeNow ), 'column');
 
