@@ -44,7 +44,7 @@ parser.add_option("-x", "--source-name", help="source connection name", metavar=
 parser.add_option("-y", "--source-status", help="source connection status", metavar="source_status")
 parser.add_option("-w", "--webstream", help="JSON metadata associated with webstream", metavar="json_data")
 parser.add_option("-n", "--liquidsoap-started", help="notify liquidsoap started", metavar="json_data", action="store_true", default=False)
-parser.add_option("--auto-dj-trigger", help="poke server to check if autodj needs to add a song", metavar="autodj_trigger", action="store_true")
+parser.add_option("--auto-dj-trigger", help="poke server to check if autodj needs to add a song", metavar="autodj_trigger", dest="autodj_trigger", action="store_true")
 
 
 # parse options
@@ -125,7 +125,7 @@ class Notify:
             self.notify_media_start_playing(options.media_id)
         elif options.liquidsoap_started:
             self.notify_liquidsoap_started()
-        elif options.autodj_trigger
+        elif options.autodj_trigger:
             self.notify_autodj_trigger()
         else:
             logger.debug("Unrecognized option in options(%s). Doing nothing" \

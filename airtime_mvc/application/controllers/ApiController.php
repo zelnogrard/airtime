@@ -896,6 +896,8 @@ class ApiController extends Zend_Controller_Action
         Logging::info("Uh-oh, autoDJ just got triggered!");
 
         //todo: add actual autodj stuff
+        
+        $this->_helper->json->sendJson(array()); //needed to override zend framework rendering, silly, I know
     }
 
     public function getBootstrapInfoAction()
