@@ -876,6 +876,27 @@ class ApiController extends Zend_Controller_Action
         Application_Model_RabbitMq::SendMessageToPypo("reset_liquidsoap_bootstrap", array());
         Application_Model_RabbitMq::PushSchedule();
     }
+    
+    /* auto-DJ action
+     * It would:
+     * 1) confirm that there is a show running right now (else quit)
+     * 2) confirm that 
+     *      no song is currently playing
+     *   OR that the current song is going to end soon (~5 sec)
+     *    (else quit)
+     * 3) schedule new content at the end of the current show
+     *    according to autodj rules
+     * (for now rules are going to be hardcoded to a single block,
+     * with plans to expand the flexibility later)
+     * 4) push a schedule update to liquidsoap
+     * TODO: admin ui for settings
+     */
+    public function autodjTriggerAction()
+    {
+        Logging::info("Uh-oh, autoDJ just got triggered!");
+
+        //todo: add actual autodj stuff
+    }
 
     public function getBootstrapInfoAction()
     {

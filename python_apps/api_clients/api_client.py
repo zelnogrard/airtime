@@ -77,6 +77,7 @@ api_config['get_files_without_replay_gain'] = 'get-files-without-replay-gain/api
 api_config['update_replay_gain_value'] = 'update-replay-gain-value/format/json/api_key/%%api_key%%'
 api_config['notify_webstream_data'] = 'notify-webstream-data/api_key/%%api_key%%/media_id/%%media_id%%/format/json'
 api_config['notify_liquidsoap_started'] = 'rabbitmq-do-push/api_key/%%api_key%%/format/json'
+api_config['notify_autodj_trigger'] = 'autodj-trigger/api_key/%%api_key%%/format/json'
 api_config['get_stream_parameters'] = 'get-stream-parameters/api_key/%%api_key%%/format/json'
 api_config['push_stream_stats'] = 'push-stream-stats/api_key/%%api_key%%/format/json'
 api_config['update_stream_setting_table'] = 'update-stream-setting-table/api_key/%%api_key%%/format/json'
@@ -241,6 +242,12 @@ class AirtimeApiClient(object):
     def notify_liquidsoap_started(self):
         try:
             self.services.notify_liquidsoap_started()
+        except Exception, e:
+            self.logger.error(str(e))
+
+    def notify_autodj_trigger(self):
+        try:
+            self.services.notify_autodj_trigger()
         except Exception, e:
             self.logger.error(str(e))
 

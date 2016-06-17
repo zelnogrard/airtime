@@ -50,6 +50,7 @@ def create_source()
     l = crossfade_airtime(l)
 
     l = on_metadata(notify_queue, l)
+    #l = on_metadata(notify_autodj_trigger, l)
     sources := list.append([l], !sources)
     server.register(namespace="queues",
                 "s#{!source_id}_skip",
@@ -281,6 +282,7 @@ else
     s
 end
 
+s = on_metadata(notify_autodj_trigger, s)
 
 # Attach a skip command to the source s:
 #add_skip_command(s)

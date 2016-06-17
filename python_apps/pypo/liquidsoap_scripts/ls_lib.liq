@@ -4,6 +4,12 @@ def notify(m)
   system(command)
 end
 
+def notify_autodj_trigger()
+  command = "/usr/lib/airtime/pypo/bin/liquidsoap_scripts/notify.sh --auto-dj-trigger &"
+  log(command)
+  system(command)
+end
+
 def notify_queue(m)
   f = !dynamic_metadata_callback
   ignore(f(m))
