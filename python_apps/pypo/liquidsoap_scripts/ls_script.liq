@@ -51,6 +51,7 @@ def create_source()
 
     l = on_metadata(notify_queue, l)
     #l = on_metadata(notify_autodj_trigger, l)
+    #l = on_end(fun(_,_) -> begin notify_autodj_trigger() end, l)
     sources := list.append([l], !sources)
     server.register(namespace="queues",
                 "s#{!source_id}_skip",
@@ -84,6 +85,9 @@ http = cross_http(http_input_id="http",http)
 output.dummy(fallible=true, http)
 stream_queue = http_fallback(http_input_id="http", http=http, default=queue)
 stream_queue = map_metadata(update=false, append_title, stream_queue)
+
+#stream_queue = on_metadata(notify_autodj_trigger, stream_queue)
+stream_queue = on_end(fun(_,_) -> begin log("!!!stream_queue on_end fired") notify_autodj_trigger() end, stream_queue)
 
 ignore(output.dummy(stream_queue, fallible=true))
 
@@ -282,7 +286,8 @@ else
     s
 end
 
-s = on_metadata(notify_autodj_trigger, s)
+#s = on_metadata(fun(m) -> begin log("!!!s on_metadata fired") notify_autodj_trigger() end, s)
+#s = on_end(fun(_,_) -> begin log("!!!s on_end fired") notify_autodj_trigger() end, s)
 
 # Attach a skip command to the source s:
 #add_skip_command(s)
@@ -400,6 +405,8 @@ if s3_enable == true then
                 s3_mount, s3_url, s3_name, s3_genre, s3_user, s, "3",
                 s3_connected, s3_description, s3_channels)
 end
+
+add_timeout(300.0, { log("!!!autodj timeout fires") notify_autodj_trigger() (300.0)})
 
 command = "/usr/lib/airtime/pypo/bin/liquidsoap_scripts/notify.sh --liquidsoap-started &"
 log(command)
