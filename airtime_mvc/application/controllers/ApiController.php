@@ -893,9 +893,85 @@ class ApiController extends Zend_Controller_Action
      */
     public function autodjTriggerAction()
     {
-        Logging::info("Uh-oh, autoDJ just got triggered!");
+        Logging::info("!!!autoDJ triggered");
 
-        //todo: add actual autodj stuff
+        //TODO: move id to conf
+        $generator_block_id = 3;
+
+//        $showInfo = Application_Model_Show::getCurrentShow();
+        try {
+            $ts = time();
+            //adding 10s since on_end can be triggered 5s before, to get a reasonable peek into the future
+            //TODO: move to cfg
+            $timeAhead = gmdate("Y-m-d H:i:s", $ts + 10);
+            
+            //this call will throw an exception if nothing is scheduled
+            //that would mean we have nothing to do (no show - no schedule), so quitting
+            $current_show_instance = Application_Model_ShowInstance::GetCurrentShowInstance($timeAhead);
+            
+            $current_show_instance_id = $current_show_instance->getShowInstanceId();
+            
+            //TODO: move SQL to datalayer for consistency
+            $sql = <<<SQL
+SELECT id, ends FROM cc_schedule
+WHERE instance_id = :instanceId
+ORDER BY ends DESC
+LIMIT 1
+SQL;
+            $row = Application_Common_Database::prepareAndExecute( $sql,
+                array(':instanceId' => $current_show_instance_id), 'single');
+
+            $pos = 0;
+            $continue = false;
+            
+            if ($row !== false)
+            {
+                $pos = $row["id"];
+                
+                $utcTimeZone = new DateTimeZone("UTC");
+                $date1 = new DateTime($row['ends'], $utcTimeZone);
+                $date2 = new DateTime();
+                $date2->setTimestamp($ts+10);
+                
+//                Logging::info("Sched ends = ");
+//                Logging::info($row['ends']);
+//                Logging::info($date1->format('Y-m-d H:i:s'));
+//                Logging::info($date1->getTimestamp());
+//                Logging::info("\$ts+10 = ");
+//                Logging::info(gmdate("Y-m-d H:i:s", $ts + 10));
+//                Logging::info($ts+10);
+//                Logging::info($date2->format('Y-m-d H:i:s'));
+//                Logging::info("ends <= (\$ts+10) = ");
+//                Logging::info($date1<=$date2);
+                
+                $continue = $date1<=$date2;
+            }
+            
+            Logging::info("\$pos = $pos");
+            Logging::info("\$continue = $continue");
+            
+            if ( $pos===0 || $continue===true )
+            {
+                $con = Propel::getConnection();
+                $con->beginTransaction();
+                
+                $scheduler = new Application_Model_Scheduler();
+                $scheduler->setCheckUserPermissions(false);
+                $scheduledItems = array(array("id" => $pos, "instance" => $current_show_instance_id, "timestamp" => $ts));
+                $scheduler->scheduleAfter($scheduledItems, array(array("id" => $generator_block_id, "type" => "block")));
+                
+                $con->commit();
+                
+                //Application_Model_RabbitMq::PushSchedule();
+                
+                $md = array('schedule' => Application_Model_Schedule::getSchedule());
+                Application_Model_RabbitMq::SendMessageToPypo("update_schedule", $md);
+            }
+        } catch (OutDatedScheduleException $e) {
+            Logging::info($e->getMessage());
+        } catch (Exception $e) {
+            Logging::info($e->getMessage());
+        }
         
         $this->_helper->json->sendJson(array()); //needed to override zend framework rendering, silly, I know
     }
