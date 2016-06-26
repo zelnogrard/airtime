@@ -36,7 +36,14 @@ $(document).ready(function(){
         if (count($ids) > 0){
             $id = $ids[0];
             $streamData = Application_Model_StreamSetting::getStreamData($id);
-            $url = "http://".$streamData["${id}_host"].":".$streamData["${id}_port"]."/".$streamData["${id}_mount"];
+            
+            //hack: override current host if localhost, to deal with streams forwarded through VM NAT
+            $host = $streamData["${id}_host"];
+            if ($host == '127.0.0.1' || $host == 'localhost'){
+                $host = $this->baseUrl;
+            }
+            
+            $url = "http://".$host.":".$streamData["${id}_port"]."/".$streamData["${id}_mount"];
             $type = $streamData["${id}_type"];
             $serverType = $streamData["${id}_output"];
             if ($type == "ogg")
@@ -68,13 +75,20 @@ $(document).ready(function(){
                     <?php
                         foreach($ids as $id) {
                             $streamData = Application_Model_StreamSetting::getStreamData($id);
-                            $url = "http://".$streamData["${id}_host"].":".$streamData["${id}_port"]."/".$streamData["${id}_mount"];
+                            
+                            //hack: override current host if localhost, to deal with streams forwarded through VM NAT
+                            $host = $streamData["${id}_host"];
+                            if ($host == '127.0.0.1' || $host == 'localhost'){
+                                $host = $this->baseUrl;
+                            }
+                            
+                            $url = "http://".$host.":".$streamData["${id}_port"]."/".$streamData["${id}_mount"];
                             $type = $streamData["${id}_type"];
                             $serverType = $streamData["${id}_output"];
                             if ($type == "ogg")
                                 $type = "oga";
 
-                            $label = "(".$streamData["${id}_host"].") ".$streamData["${id}_description"]." - ".$streamData["${id}_bitrate"]." kbit/s";
+                            $label = "(".$host.") ".$streamData["${id}_description"]." - ".$streamData["${id}_bitrate"]." kbit/s";
                             echo sprintf("<option class='stream' value='%s' data-url='%s' data-type='%s' server-type='%s'>%s</option>", $id, $url, $type, $serverType, $label);
                         }
                     ?>

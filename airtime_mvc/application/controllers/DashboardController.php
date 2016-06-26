@@ -106,6 +106,7 @@ class DashboardController extends Zend_Controller_Action
 
         $baseUrl = Application_Common_OsPath::getBaseDir();
 
+        $this->view->baseUrl = explode(':', $_SERVER['HTTP_HOST'])[0];
         $this->view->headLink()->appendStylesheet($baseUrl.'js/jplayer/skin/jplayer.blue.monday.css?'.$CC_CONFIG['airtime_version']);
         $this->_helper->layout->setLayout('livestream');
 
