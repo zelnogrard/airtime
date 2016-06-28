@@ -24,6 +24,21 @@ def run_process(command):
     p = Popen(command, stdout=PIPE, stderr=PIPE)
     return os.waitpid(p.pid, 0)[1]
 
+def get_process_output2(command):
+    """
+    Run subprocess and return stdout
+    """
+    #logger.debug(command)
+    p = Popen(command, shell=True, stdout=PIPE)
+    return p.communicate()[0].strip()
+
+def run_process2(command):
+    """
+    Run subprocess and return "return code"
+    """
+    p = Popen(command, shell=True)
+    return os.waitpid(p.pid, 0)[1]
+
 def get_mime_type(file_path):
     """
     Attempts to get the mime type but will return prematurely if the process
@@ -96,6 +111,10 @@ def calculate_replay_gain(file_path):
         file_type = get_file_type(file_path)
         nice_level = '19'
 
+#        logger.info("file_path = %s" % file_path)
+#        logger.info("temp_file_path = %s" % temp_file_path)
+#        logger.info("file_type = %s" % file_type)
+        
         if file_type:
             if file_type == 'mp3':
                 if run_process(['which', 'mp3gain']) == 0:
@@ -129,8 +148,9 @@ def calculate_replay_gain(file_path):
                     search = re.search(r'REPLAYGAIN_TRACK_GAIN=(.*) dB', out)
                 else: logger.warn("metaflac not found")
             elif file_type == 'mp4':
-                if run_process("which aacgain > /dev/null") == 0:
-                    out = get_process_output('aacgain -q "%s" 2> /dev/null' % temp_file_path)
+                if run_process2("which aacgain > /dev/null") == 0:
+                    out = get_process_output2('aacgain -q "%s" 2> /dev/null' % temp_file_path)
+                    #logger.info("out = %s" % out)
                     search = re.search(r'Recommended "Track" dB change: (.*)', out)
                 else:
                     logger.warn("aacgain not found")
